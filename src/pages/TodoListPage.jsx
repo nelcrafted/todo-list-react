@@ -1,0 +1,71 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import TodoFormModal from "../components/TodoFormModal";
+import ConfirmModal from "../components/ConfirmModal";
+import { EyeIcon, TrashIcon } from "../components/Icons";
+
+export default function TodoListPage({ todos, onAdd, onDelete }) {
+  const navigate = useNavigate();
+  const [showAdd, setShowAdd] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
+
+  return (
+    <main className="page">
+      <header className="page-header">
+        <h1>Todo List</h1>
+        <button className="btn btn-blue" onClick={() => setShowAdd(true)}>Tambah Todo</button>
+      </header>
+
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Judul</th>
+            <th>Status</th>
+            <th>Prioritas</th>
+            <th>Deadline</th>
+            <th className="center">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {todos.length === 0 && (
+            <tr>
+              <td colSpan={5} className="empty">Belum ada tugas. Klik "Tambah Todo" untuk membuat tugas pertama.</td>
+            </tr>
+          )}
+          {todos.map((todo) => (
+            <tr key={todo.id}>
+              <td className="truncate" title={todo.title}>{todo.title}</td>
+              <td>{todo.status}</td>
+              <td>{todo.priority}</td>
+              <td>{todo.deadline}</td>
+              <td className="center">
+                <div className="actions">
+                  <button className="icon-btn blue" aria-label={`Lihat ${todo.title}`} onClick={() => navigate(`/todo/${todo.id}`)}>
+                    <EyeIcon />
+                  </button>
+                  <button className="icon-btn red" aria-label={`Hapus ${todo.title}`} onClick={() => setToDelete(todo)}>
+                    <TrashIcon />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {showAdd && <TodoFormModal mode="add" onSubmit={onAdd} onClose={() => setShowAdd(false)} />}
+
+      {toDelete && (
+        <ConfirmModal
+          title="Hapus Todo"
+          message={`Yakin ingin menghapus "${toDelete.title}"? Tindakan ini tidak dapat dibatalkan.`}
+          onCancel={() => setToDelete(null)}
+          onConfirm={() => {
+            onDelete(toDelete.id);
+            setToDelete(null);
+          }}
+        />
+      )}
+    </main>
+  );
+}
